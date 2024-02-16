@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include "complex.h"
 
 typedef struct ComplexNumber complex;
@@ -34,4 +35,8 @@ complex complex_add(complex *a, complex *b) {
   };
 
   return r;
+}
+
+double complex_magnitude(complex *x) {
+  return sqrt((x->re, 2) + pow(x->im, 2));
 }

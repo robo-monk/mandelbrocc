@@ -53,12 +53,14 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
         pixels,
         w_width,
         w_height);
+
     SDL_UpdateTexture(texture, NULL, pixels, w_width * sizeof(Uint32));
     SDL_RenderCopy(renderer, texture, NULL, NULL);
 
     endTick = SDL_GetTicks();
 
     Uint32 frameTime = endTick - startTick;
+    currentFrame += 1;
     frameTimes[currentFrame % FPS_UPDATE_INTERVAL] = frameTime;
 
     if (currentFrame % FPS_UPDATE_INTERVAL == 0)
@@ -71,7 +73,7 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
       fps = (Uint32)(1000.0f / (totalFrameTime / FPS_UPDATE_INTERVAL));
       currentFrame = 0;
     }
-    currentFrame += 1;
+
     render_fps(renderer, font, fps);
     SDL_RenderPresent(renderer);
   }
