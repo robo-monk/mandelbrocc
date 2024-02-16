@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <SDL.h>
 
+void event_loop()
+{
+  
+}
+
 void init_sdl() {
   if (SDL_Init(SDL_INIT_VIDEO) < 0)
   {
@@ -12,13 +17,19 @@ void init_sdl() {
     if (window == NULL)
     {
       printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+    } else {
+      SDL_bool done = SDL_FALSE;
+      while (!done) {
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+          if (event.type == SDL_QUIT) {
+            done = SDL_TRUE;
+          }
+        }
+        event_loop();
+      }
+      SDL_DestroyWindow(window);
     }
-    else
-    {
-      // Wait 5 seconds
-      SDL_Delay(5000);
-    }
-    SDL_DestroyWindow(window);
   }
   SDL_Quit();
 }

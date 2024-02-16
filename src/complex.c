@@ -12,10 +12,16 @@ complex complex_new(double re, double im) {
   return a;
 }
 
-complex complex_multiply(complex *a, complex *b) {
+complex complex_multiply(complex *x, complex *y) {
+  //   (a + bi) * (c + di) 
+  // = (ac + adi) + (bci - bd) =
+  // = (ac - bd) + (ad + bc)i
+
+  //   a = x.re, c = y.re
+  //   b = x.im, d = y.im
   complex r = {
-    .im = a->im * b->im,
-    .re = a->re * b->re
+    .re = (x->re * y->re - x->im * y->im),
+    .im = (x->re * y->im + x->im * y->re)
   };
 
   return r;
