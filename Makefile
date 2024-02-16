@@ -1,7 +1,7 @@
 # Define compiler and flags
 CC = clang
 CFLAGS = -Wall -Wextra $(shell sdl2-config --cflags)
-LIBS = $(shell sdl2-config --libs)
+LIBS = $(shell sdl2-config --libs) -lSDL2_ttf
 
 # Define source, object, and binary directories
 SRC_DIR = src
