@@ -4,8 +4,8 @@
 #include "application.h"
 #include "event_loop.h"
 
-int w_width = 1280;
-int w_height = 800;
+int w_width = 500;
+int w_height = 500;
 
 void init_sdl()
 {

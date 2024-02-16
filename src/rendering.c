@@ -3,6 +3,7 @@
 #include <SDL_ttf.h>
 #include <stdio.h>
 #include "util.h"
+#include "mandelbrot.h"
 
 void render_fps(SDL_Renderer *renderer, TTF_Font *font, int fps)
 {
@@ -28,19 +29,18 @@ void draw(
   int screenWidth,
   int screenHeight
 ) {
-  Uint8 r, g, b;
-  unsigned int seed = SDL_GetTicks();
+  mandelbrot_render(pixels, screenWidth, screenHeight, 0.0, 0.0, 1.0);
+  // Uint8 r, g, b;
+  // unsigned int seed = SDL_GetTicks();
 
-  for (int i = 0; i < screenWidth * screenHeight; i++)
-  {
-    // Uint8 r = rand() % 256;
-    // Uint8 g = rand() % 256;
-    // Uint8 b = rand() % 256;
-    // unsigned int randVal = rand_r(&seed); // Use reentrant rand for potential thread-safety
-    unsigned int r = rand_r(&seed);
-    r = (r) & 0xFF;
-    g = ((r >> 8) & 0xFF);
-    b = ((r >> 16) & 0xFF);
-    pixels[i] = (255 << 24) + (r << 16) + (g << 8) + b; // Assuming ARGB8888 format
-  }
+  // for (int i = 0; i < screenWidth * screenHeight; i++)
+  // {
+  //   unsigned int r = rand_r(&seed);
+  //   unsigned int g = rand_r(&seed);
+  //   unsigned int b = rand_r(&seed);
+  //   r = (r) & 0xFF;
+  //   g = (g) & 0xFF;
+  //   b = (b) & 0xFF;
+  //   pixels[i] = (255 << 24) + (r << 16) + (g << 8) + b; // Assuming ARGB8888 format
+  // }
 }
