@@ -5,6 +5,6 @@
 #include "SDL_ttf.h"
 
 void render_fps(SDL_Renderer *renderer, TTF_Font *font, int fps);
-void draw(SDL_Renderer *renderer, int screenWidth, int screenHeight);
+void draw(SDL_Renderer *renderer, SDL_Texture *texture, Uint32 *pixels, int screenWidth, int screenHeight);
 
 #endif

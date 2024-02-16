@@ -21,42 +21,26 @@ void render_fps(SDL_Renderer *renderer, TTF_Font *font, int fps)
 }
 
 
+void draw(
+  SDL_Renderer *renderer,
+  SDL_Texture *texture,
+  Uint32 *pixels,
+  int screenWidth,
+  int screenHeight
+) {
+  Uint8 r, g, b;
+  unsigned int seed = SDL_GetTicks();
 
-
-void draw(SDL_Renderer *renderer, int screenWidth, int screenHeight)
-{
-  // Create a texture for pixel manipulation
-  SDL_Texture *texture = SDL_CreateTexture(renderer,
-                                           SDL_PIXELFORMAT_ARGB8888,
-                                           SDL_TEXTUREACCESS_STREAMING,
-                                           screenWidth, screenHeight);
-
-  // Allocate a buffer for pixel data
-  Uint32 *pixels = malloc(screenWidth * screenHeight * sizeof(Uint32));
-  if (!pixels)
-  {
-    // Handle allocation failure
-    return;
-  }
-
-  // Fill the buffer with random colors
   for (int i = 0; i < screenWidth * screenHeight; i++)
   {
-    Uint8 r = rand() % 256;
-    Uint8 g = rand() % 256;
-    Uint8 b = rand() % 256;
+    // Uint8 r = rand() % 256;
+    // Uint8 g = rand() % 256;
+    // Uint8 b = rand() % 256;
+    // unsigned int randVal = rand_r(&seed); // Use reentrant rand for potential thread-safety
+    unsigned int r = rand_r(&seed);
+    r = (r) & 0xFF;
+    g = ((r >> 8) & 0xFF);
+    b = ((r >> 16) & 0xFF);
     pixels[i] = (255 << 24) + (r << 16) + (g << 8) + b; // Assuming ARGB8888 format
   }
-
-  // Update texture with pixel buffer
-  SDL_UpdateTexture(texture, NULL, pixels, screenWidth * sizeof(Uint32));
-
-  // Free the pixel buffer
-  free(pixels);
-
-  // Copy the texture to the renderer
-  SDL_RenderCopy(renderer, texture, NULL, NULL);
-
-  // Destroy the texture after use
-  SDL_DestroyTexture(texture);
 }

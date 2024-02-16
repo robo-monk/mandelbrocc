@@ -2,12 +2,28 @@
 #include "rendering.h"
 #include "util.h"
 
+#define FPS_UPDATE_INTERVAL 15          // Update FPS every 10 frames, can be changed
+#define TARGET_FPS 60                   // Target FPS, can be changed
+#define FRAME_DELAY (1000 / TARGET_FPS) // Target frame time in milliseconds
+
 void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
 {
-  Uint32 startTick, endTick = 0;
+  Uint32 startTick, endTick, frame_count = 0;
   Uint32 secondStart = SDL_GetTicks(), fps = 0;
+  float frameTimes[FPS_UPDATE_INTERVAL]; // Array to store frame times
+  int currentFrame = 0;
 
   SDL_bool done = SDL_FALSE;
+
+  int w_width, w_height;
+  SDL_GetWindowSize(window, &w_width, &w_height);
+
+  SDL_Texture *texture = SDL_CreateTexture(renderer,
+                                           SDL_PIXELFORMAT_ARGB8888,
+                                           SDL_TEXTUREACCESS_STREAMING,
+                                           w_width, w_height);
+  Uint32 *pixels = malloc(w_width * w_height * sizeof(Uint32));
+
   while (!done)
   {
     startTick = SDL_GetTicks();
@@ -24,15 +40,38 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
     // SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
 
-    int w_width, w_height;
-    SDL_GetWindowSize(window, &w_width, &w_height);
+    // TODO dynamically adjust width and height
+    // int w_width, w_height;
+    // SDL_GetWindowSize(window, &w_width, &w_height);
 
     // Your drawing code here (or call a function)
-    draw(renderer, w_width, w_height);
+    // draw(renderer, w_width, w_height);
 
+    draw(
+        renderer,
+        texture,
+        pixels,
+        w_width,
+        w_height);
+    SDL_UpdateTexture(texture, NULL, pixels, w_width * sizeof(Uint32));
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
 
     endTick = SDL_GetTicks();
-    fps = 1000/(endTick - startTick);
+
+    Uint32 frameTime = endTick - startTick;
+    frameTimes[currentFrame % FPS_UPDATE_INTERVAL] = frameTime;
+
+    if (currentFrame % FPS_UPDATE_INTERVAL == 0)
+    {
+      float totalFrameTime = 0;
+      for (int i = 0; i < FPS_UPDATE_INTERVAL; i++)
+      {
+        totalFrameTime += frameTimes[i];
+      }
+      fps = (Uint32)(1000.0f / (totalFrameTime / FPS_UPDATE_INTERVAL));
+      currentFrame = 0;
+    }
+    currentFrame += 1;
     render_fps(renderer, font, fps);
     SDL_RenderPresent(renderer);
   }
