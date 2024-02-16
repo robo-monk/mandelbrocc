@@ -1,9 +1,5 @@
 #include <stdio.h>
-
-struct ComplexNumber {
-  double im;
-  double re;
-};
+#include "complex.h"
 
 typedef struct ComplexNumber complex;
 
@@ -16,6 +12,15 @@ complex complex_new(double re, double im) {
   return a;
 }
 
+complex complex_multiply(complex *a, complex *b) {
+  complex r = {
+    .im = a->im * b->im,
+    .re = a->re * b->re
+  };
+
+  return r;
+}
+
 complex complex_add(complex *a, complex *b) {
   complex r = {
     .im = a->im + b->im,
@@ -23,13 +28,4 @@ complex complex_add(complex *a, complex *b) {
   };
 
   return r;
-}
-
-int main() {
-  complex a = { .im = 0.0, .re = 0.0 };
-  complex b = { .im = -1.0, .re = +2.0 };
-  complex r = complex_add(&a, &b);
-  complex_print(&r);
-	printf("Hello world!");
-	return 0;
 }
