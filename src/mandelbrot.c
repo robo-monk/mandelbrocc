@@ -17,12 +17,11 @@ int mandelbrot_params_eq(mandelbrot_params *a, mandelbrot_params *b)
     return (a->focal_x == b->focal_x) && (a->focal_y == b->focal_y) && (a->zoom == b->zoom);
 }
 
-double run_mandelbrot(complex *c)
+double run_mandelbrot(complex *c, int max_iterations)
 {
     complex z = complex_new(0.0, 0.0);
     int i = 0;
-    int MAX_ITERATIONS = 200;
-    while (i < MAX_ITERATIONS)
+    while (i < max_iterations)
     {
         complex r = complex_multiply(&z, &z);
         z = complex_add(c, &r);
@@ -34,7 +33,7 @@ double run_mandelbrot(complex *c)
 
         i++;
     }
-    return (double)i / (double)MAX_ITERATIONS;
+    return (double)i / (double)max_iterations;
 }
 
 Uint32 rgb(int r, int g, int b)
@@ -70,8 +69,9 @@ void mandelbrot_render(
     Uint32 *pixels,
     int width,
     int height,
-    mandelbrot_params *params)
-{
+    mandelbrot_params *params,
+    int max_iterations
+) {
     double aspect_ratio = width / height;
 
     complex min_c = complex_new(0.0, 0.0);
@@ -89,7 +89,7 @@ void mandelbrot_render(
         for (double x = min_c.re; x < max_c.re; x += x_incr)
         {
             complex current_point = complex_new(x, y);
-            double c = 255 * run_mandelbrot(&current_point);
+            double c = 255 * run_mandelbrot(&current_point, max_iterations);
             pixels[i] = rgb(c, c, c);
             i++;
         }

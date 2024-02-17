@@ -39,6 +39,7 @@ void render_stat(SDL_Renderer *renderer, TTF_Font *font, char* s, int x, int y)
 
 mandelbrot_params m_params = { .focal_x = 0.0, .focal_y = 0.0, .zoom = 1.0 };
 mandelbrot_params rendered_m_params;
+int current_resolution = 10;
 
 void draw(
   SDL_Renderer *renderer,
@@ -49,7 +50,7 @@ void draw(
 ) {
   if (!mandelbrot_params_eq(&m_params, &rendered_m_params)) {
     rendered_m_params = m_params;
-    mandelbrot_render(pixels, screenWidth, screenHeight, &m_params);
+    mandelbrot_render(pixels, screenWidth, screenHeight, &m_params, current_resolution);
   }
 }
 
@@ -69,23 +70,23 @@ void handle_keyboard_event(
 ) {
   switch (key->keysym.sym) {
     case SDLK_LEFT:
-      m_params.focal_x -= m_params.zoom/1000;
+      m_params.focal_x -= m_params.zoom/100;
       break;
     case SDLK_RIGHT:
-      m_params.focal_x += m_params.zoom/1000;
+      m_params.focal_x += m_params.zoom/100;
       break;
     case SDLK_DOWN:
-      m_params.focal_y -= m_params.zoom/1000;
+      m_params.focal_y -= m_params.zoom/100;
       break;
     case SDLK_UP:
-      m_params.focal_y += m_params.zoom/1000;
+      m_params.focal_y += m_params.zoom/100;
       break;
     case SDLK_EQUALS:
     case SDLK_PLUS:
-      m_params.zoom *= 2;
+      m_params.zoom *= 1.1;
       break;
     case SDLK_MINUS:
-      m_params.zoom /= 2;
+      m_params.zoom /= 1.1;
       break;
     default:break;
   }

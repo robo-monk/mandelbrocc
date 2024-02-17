@@ -36,7 +36,7 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
         case SDL_QUIT:
           done = SDL_TRUE;
           break;
-        // case SDL_KEYDOWN:
+        case SDL_KEYDOWN:
         case SDL_KEYUP:
           handle_keyboard_event(&event.key);
           break;
