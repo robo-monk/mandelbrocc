@@ -22,6 +22,7 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
                                            SDL_PIXELFORMAT_ARGB8888,
                                            SDL_TEXTUREACCESS_STREAMING,
                                            w_width, w_height);
+
   Uint32 *pixels = malloc(w_width * w_height * sizeof(Uint32));
 
   while (!done)
@@ -48,11 +49,12 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
     // draw(renderer, w_width, w_height);
 
     draw(
-        renderer,
-        texture,
-        pixels,
-        w_width,
-        w_height);
+      renderer,
+      texture,
+      pixels,
+      w_width,
+      w_height
+    );
 
     SDL_UpdateTexture(texture, NULL, pixels, w_width * sizeof(Uint32));
     SDL_RenderCopy(renderer, texture, NULL, NULL);
@@ -75,6 +77,14 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
     }
 
     render_fps(renderer, font, fps);
+
+    draw_text(
+      renderer,
+      font,
+      w_width,
+      w_height
+    );
+
     SDL_RenderPresent(renderer);
   }
 }
