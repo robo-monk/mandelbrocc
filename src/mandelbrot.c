@@ -65,6 +65,43 @@ double map_value(double value, double start1, double stop1, double start2, doubl
     return (value - start1) / (stop1 - start1) * (stop2 - start2) + start2;
 }
 
+// maps image a to b
+void image_map(
+    Uint32 *image_a,
+    int width_a,
+    int height_a,
+
+    Uint32 *image_b,
+    int width_b,
+    int height_b
+) {
+    double x_ratio = width_a / width_b;
+    double y_ratio = height_a / height_b;
+
+    for (int x = 0; x < width_b; x ++) {
+        for (int y = 0; y < height_b; y ++) {
+            int i_a = x*x_ratio + y*y_ratio*height_a;
+            int i_b = x + y*height_b;
+            image_b[i_b] = image_a[i_a];
+        }
+    }
+}
+
+void mandelbrot_render_resolution(
+    Uint32 *pixels,
+    int width,
+    int height,
+    int resolution_width,
+    int resolution_height,
+    mandelbrot_params *params,
+    int max_iterations
+) {
+    Uint32 *r_image = malloc(resolution_width * resolution_height * sizeof(Uint32));
+    mandelbrot_render(r_image, resolution_width, resolution_height, params, max_iterations);
+    image_map(r_image, resolution_width, resolution_height, pixels, width, height);
+    free(r_image);
+}
+
 // TODO instead of pasting on the actual pixels,
 // map a width x height pixels array on the Uint32 pixels
 void mandelbrot_render(

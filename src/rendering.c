@@ -39,8 +39,8 @@ void render_stat(SDL_Renderer *renderer, TTF_Font *font, char* s, int x, int y)
 
 mandelbrot_params m_params = { .focal_x = 0.0, .focal_y = 0.0, .zoom = 1.0 };
 mandelbrot_params rendered_m_params;
-int MAX_RESOLUTION = 100;
-int INITIAL_RESOLUTION = 25;
+int MAX_RESOLUTION = 500;
+int INITIAL_RESOLUTION = 10;
 int current_resolution = 10;
 
 void draw(
@@ -53,10 +53,13 @@ void draw(
   if (!mandelbrot_params_eq(&m_params, &rendered_m_params)) {
     current_resolution = INITIAL_RESOLUTION;
     rendered_m_params = m_params;
-    mandelbrot_render(pixels, screenWidth, screenHeight, &m_params, current_resolution);
+    // mandelbrot_render(pixels, screenWidth, screenHeight, &m_params, current_resolution);
   } else if (current_resolution < MAX_RESOLUTION) {
     current_resolution *= 2;
     mandelbrot_render(pixels, screenWidth, screenHeight, &m_params, current_resolution);
+    // double res_fraction = current_resolution/MAX_RESOLUTION;
+    // double res_fraction = 2;
+    // mandelbrot_render_resolution(pixels, screenWidth, screenHeight, screenWidth*res_fraction, screenHeight*res_fraction, &m_params, 20);
   }
 }
 
