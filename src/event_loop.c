@@ -25,18 +25,26 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
 
   Uint32 *pixels = malloc(w_width * w_height * sizeof(Uint32));
 
-  while (!done)
+  while (1)
   {
     startTick = SDL_GetTicks();
 
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
-      if (event.type == SDL_QUIT)
-      {
-        done = SDL_TRUE;
+      switch (event.type) {
+        case SDL_QUIT:
+          done = SDL_TRUE;
+          break;
+        // case SDL_KEYDOWN:
+        case SDL_KEYUP:
+          handle_keyboard_event(&event.key);
+          break;
+        default:break;
       }
     }
+
+    if (done) break;
 
     // SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);

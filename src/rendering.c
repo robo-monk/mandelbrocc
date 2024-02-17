@@ -60,6 +60,33 @@ void draw_text(
   int screenHeight
 ) {
   char focal_stat[64];
-  sprintf(focal_stat, "%f, %fi", m_params.focal_x, m_params.focal_y);
+  sprintf(focal_stat, "%f, %fi @%f", m_params.focal_x, m_params.focal_y,m_params.zoom);
   render_stat(renderer, font, focal_stat, 5, 25);
+}
+
+void handle_keyboard_event(
+  SDL_KeyboardEvent *key
+) {
+  switch (key->keysym.sym) {
+    case SDLK_LEFT:
+      m_params.focal_x -= m_params.zoom/1000;
+      break;
+    case SDLK_RIGHT:
+      m_params.focal_x += m_params.zoom/1000;
+      break;
+    case SDLK_DOWN:
+      m_params.focal_y -= m_params.zoom/1000;
+      break;
+    case SDLK_UP:
+      m_params.focal_y += m_params.zoom/1000;
+      break;
+    case SDLK_EQUALS:
+    case SDLK_PLUS:
+      m_params.zoom *= 2;
+      break;
+    case SDLK_MINUS:
+      m_params.zoom /= 2;
+      break;
+    default:break;
+  }
 }
