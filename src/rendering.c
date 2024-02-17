@@ -68,22 +68,25 @@ void draw_text(
 void handle_keyboard_event(
   SDL_KeyboardEvent *key
 ) {
+  double MOVE_SENSITIVITY = 1;
+  double move_nip = MOVE_SENSITIVITY/m_params.zoom;
   switch (key->keysym.sym) {
     case SDLK_LEFT:
-      m_params.focal_x -= m_params.zoom/100;
+      m_params.focal_x -= move_nip; 
       break;
     case SDLK_RIGHT:
-      m_params.focal_x += m_params.zoom/100;
+      m_params.focal_x += move_nip;
       break;
     case SDLK_DOWN:
-      m_params.focal_y -= m_params.zoom/100;
+      m_params.focal_y -= move_nip;
       break;
     case SDLK_UP:
-      m_params.focal_y += m_params.zoom/100;
+      m_params.focal_y += move_nip; 
       break;
     case SDLK_EQUALS:
     case SDLK_PLUS:
       m_params.zoom *= 1.1;
+      // m_params.zoom *= 1.1;
       break;
     case SDLK_MINUS:
       m_params.zoom /= 1.1;
