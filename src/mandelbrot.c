@@ -65,6 +65,8 @@ double map_value(double value, double start1, double stop1, double start2, doubl
     return (value - start1) / (stop1 - start1) * (stop2 - start2) + start2;
 }
 
+// TODO instead of pasting on the actual pixels,
+// map a width x height pixels array on the Uint32 pixels
 void mandelbrot_render(
     Uint32 *pixels,
     int width,
@@ -83,15 +85,21 @@ void mandelbrot_render(
     double x_incr = (max_c.re - min_c.re) / (double)width;
     double y_incr = (max_c.im - min_c.im) / (double)height;
 
-    int i = 0;
+    // int i = 0;
+    int image_x = 0;
+    int image_y = 0;
     for (double y = min_c.im; y < max_c.im; y += y_incr)
     {
         for (double x = min_c.re; x < max_c.re; x += x_incr)
         {
             complex current_point = complex_new(x, y);
-            double c = 255 * run_mandelbrot(&current_point, max_iterations);
-            pixels[i] = rgb(c, c, c);
-            i++;
+            double c = 200 * run_mandelbrot(&current_point, max_iterations);
+            // pixels[i] = rgb(c, c, c);
+            // i++;
+            image_x += 1;
+            pixels[(image_y * height) + image_x] = rgb(c, c, c);
         }
+        image_x = 0;
+        image_y += 1;
     }
 }

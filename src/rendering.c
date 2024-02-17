@@ -39,6 +39,8 @@ void render_stat(SDL_Renderer *renderer, TTF_Font *font, char* s, int x, int y)
 
 mandelbrot_params m_params = { .focal_x = 0.0, .focal_y = 0.0, .zoom = 1.0 };
 mandelbrot_params rendered_m_params;
+int MAX_RESOLUTION = 100;
+int INITIAL_RESOLUTION = 25;
 int current_resolution = 10;
 
 void draw(
@@ -49,7 +51,11 @@ void draw(
   int screenHeight
 ) {
   if (!mandelbrot_params_eq(&m_params, &rendered_m_params)) {
+    current_resolution = INITIAL_RESOLUTION;
     rendered_m_params = m_params;
+    mandelbrot_render(pixels, screenWidth, screenHeight, &m_params, current_resolution);
+  } else if (current_resolution < MAX_RESOLUTION) {
+    current_resolution *= 2;
     mandelbrot_render(pixels, screenWidth, screenHeight, &m_params, current_resolution);
   }
 }
@@ -68,7 +74,7 @@ void draw_text(
 void handle_keyboard_event(
   SDL_KeyboardEvent *key
 ) {
-  double MOVE_SENSITIVITY = 1;
+  double MOVE_SENSITIVITY = .1;
   double move_nip = MOVE_SENSITIVITY/m_params.zoom;
   switch (key->keysym.sym) {
     case SDLK_LEFT:
