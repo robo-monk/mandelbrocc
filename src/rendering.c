@@ -39,12 +39,14 @@ void render_stat(SDL_Renderer *renderer, TTF_Font *font, char* s, int x, int y)
 
 mandelbrot_params m_params = { .focal_x = 0.0, .focal_y = 0.0, .zoom = 1.0 };
 mandelbrot_params rendered_m_params;
-int MAX_RESOLUTION = 160;
-int INITIAL_RESOLUTION = 10;
-int current_resolution = 10;
+// int INITIAL_RESOLUTION = 10;
+// int MAX_RESOLUTION = 160;
+float INITIAL_RESOLUTION = 1.0 / (16.0);
+float current_resolution = 1.0 / (16.0);
+
 double *mandel_data;
-int max_mandel_rows = 400;
-int max_mandel_cols = 400;
+int max_mandel_rows = 1000;
+int max_mandel_cols = 1000;
 
 void rendering_setup() {
   mandel_data = malloc(max_mandel_cols * max_mandel_rows * sizeof(double));
@@ -61,15 +63,12 @@ void draw(
     current_resolution = INITIAL_RESOLUTION;
     rendered_m_params = m_params;
     // mandelbrot_render(pixels, screenWidth, screenHeight, &m_params, current_resolution);
-  } else if (current_resolution < MAX_RESOLUTION) {
-    current_resolution *= 2;
-    mandelbrot_compute(mandel_data, screenWidth/2, screenHeight/2, &m_params, 100);
-    render_data(mandel_data, screenWidth/2, screenHeight/2, pixels, screenWidth, screenHeight);
-    // mandelbrot_render(pixels, screenWidth, screenHeight, &m_params, current_resolution);
-    // double res_fraction = current_resolution/MAX_RESOLUTION;
-    // double res_fraction = 2;
-    // mandelbrot_render_resolution(pixels, screenWidth, screenHeight, screenWidth*res_fraction, screenHeight*res_fraction, &m_params, 20);
+  } else if (current_resolution < 1.0) {
+    current_resolution *= 2.0;
+    mandelbrot_compute(mandel_data, screenWidth*current_resolution, screenHeight*current_resolution, &m_params, (100 + m_params.zoom)*current_resolution);
+    render_data(mandel_data, screenWidth*current_resolution, screenHeight*current_resolution, pixels, screenWidth, screenHeight);
   }
+
 }
 
 void draw_text(
@@ -79,7 +78,7 @@ void draw_text(
   int screenHeight
 ) {
   char focal_stat[64];
-  sprintf(focal_stat, "%f, %fi @%f - %d%", m_params.focal_x, m_params.focal_y,m_params.zoom, (100*current_resolution/MAX_RESOLUTION));
+  sprintf(focal_stat, "%f, %fi @%f - %d", m_params.focal_x, m_params.focal_y,m_params.zoom, ((int)(100*current_resolution)));
   render_stat(renderer, font, focal_stat, 5, 25);
 }
 
