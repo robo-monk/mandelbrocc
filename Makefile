@@ -1,5 +1,5 @@
 # Define compiler and flags
-CC = clang
+CC = gcc
 CFLAGS = -Wall -Wextra $(shell sdl2-config --cflags)
 LIBS = $(shell sdl2-config --libs) -lSDL2_ttf
 

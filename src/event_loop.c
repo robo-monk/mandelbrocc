@@ -1,10 +1,24 @@
 #include "event_loop.h"
+#include "SDL_thread.h"
 #include "rendering.h"
 #include "util.h"
 
 #define FPS_UPDATE_INTERVAL 15          // Update FPS every 10 frames, can be changed
 #define TARGET_FPS 60                   // Target FPS, can be changed
 #define FRAME_DELAY (1000 / TARGET_FPS) // Target frame time in milliseconds
+
+int draw_thread_function(void *ptr);
+
+// Structure to pass data to the drawing thread
+typedef struct
+{
+  SDL_Renderer *renderer;
+  SDL_Texture *texture;
+  Uint32 *pixels;
+  int w_width;
+  int w_height;
+  SDL_atomic_t shutdown;
+} DrawThreadData;
 
 void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
 {
@@ -27,6 +41,11 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
 
   Uint32 *pixels = malloc(w_width * w_height * sizeof(Uint32));
 
+  DrawThreadData data = {renderer, texture, pixels, w_width, w_height};
+
+  // Create the drawing thread
+  SDL_Thread *drawThread = SDL_CreateThread(draw_thread_function, "DrawingThread", (void *)&data);
+
   while (1)
   {
     startTick = SDL_GetTicks();
@@ -46,7 +65,10 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
       }
     }
 
-    if (done) break;
+    if (done) {
+      SDL_AtomicSet(&data.shutdown, 1);
+      break;
+    }
 
     // SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
@@ -58,13 +80,13 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
     // Your drawing code here (or call a function)
     // draw(renderer, w_width, w_height);
 
-    draw(
-      renderer,
-      texture,
-      pixels,
-      w_width,
-      w_height
-    );
+    // draw(
+    //   renderer,
+    //   texture,
+    //   pixels,
+    //   w_width,
+    //   w_height
+    // );
 
     SDL_UpdateTexture(texture, NULL, pixels, w_width * sizeof(Uint32));
     SDL_RenderCopy(renderer, texture, NULL, NULL);
@@ -86,15 +108,41 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
       currentFrame = 0;
     }
 
-    render_fps(renderer, font, fps);
+    // render_fps(renderer, font, fps);
 
-    draw_text(
-      renderer,
-      font,
-      w_width,
-      w_height
-    );
+    // draw_text(
+    //   renderer,
+    //   font,
+    //   w_width,
+    //   w_height
+    // );
 
     SDL_RenderPresent(renderer);
   }
+
+  SDL_WaitThread(drawThread, NULL);
+  free(pixels);
+}
+
+int draw_thread_function(void *ptr)
+{
+  DrawThreadData *data = (DrawThreadData *)ptr;
+
+  while (!SDL_AtomicGet(&data->shutdown))
+  {
+    // Perform drawing operations here
+    draw(data->renderer, data->texture, data->pixels, data->w_width, data->w_height);
+    // draw_text(
+    //   data->renderer,
+    //   font,
+    //   w_width,
+    //   w_height
+    // );
+
+
+
+    // SDL_Delay(FRAME_DELAY); // Control the drawing rate
+  }
+
+  return 0; // Exit the thread when shutdown signal is received
 }

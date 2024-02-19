@@ -1,4 +1,5 @@
 #include "rendering.h"
+#include "sdl_frontend.h"
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <stdio.h>
@@ -24,8 +25,6 @@ void render_fps(SDL_Renderer *renderer, TTF_Font *font, int fps)
 void render_stat(SDL_Renderer *renderer, TTF_Font *font, char* s, int x, int y)
 {
   SDL_Color color = {255, 255, 255, 255}; // White color for the FPS counter text
-  // char fpsText[15];
-  // sprintf(s, "FPS: %d", fps); // Create a string for the FPS text
 
   SDL_Surface *surface = TTF_RenderText_Solid(font, s, color);
   SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
@@ -41,8 +40,8 @@ mandelbrot_params m_params = { .focal_x = 0.0, .focal_y = 0.0, .zoom = 1.0 };
 mandelbrot_params rendered_m_params;
 // int INITIAL_RESOLUTION = 10;
 // int MAX_RESOLUTION = 160;
-float INITIAL_RESOLUTION = 1.0 / (16.0);
-float current_resolution = 1.0 / (16.0);
+float INITIAL_RESOLUTION = 1.0 / (256.0);
+float current_resolution = 1.0 / (256.0);
 
 double *mandel_data;
 int max_mandel_rows = 1000;
@@ -52,6 +51,7 @@ void rendering_setup() {
   mandel_data = malloc(max_mandel_cols * max_mandel_rows * sizeof(double));
 }
 
+// TODO this should be platfrom agnostic
 void draw(
   SDL_Renderer *renderer,
   SDL_Texture *texture,
@@ -65,7 +65,16 @@ void draw(
     // mandelbrot_render(pixels, screenWidth, screenHeight, &m_params, current_resolution);
   } else if (current_resolution < 1.0) {
     current_resolution *= 2.0;
-    mandelbrot_compute(mandel_data, screenWidth*current_resolution, screenHeight*current_resolution, &m_params, (100 + m_params.zoom)*current_resolution);
+
+    mandelbrot_compute(
+      mandel_data,
+      screenWidth*current_resolution,
+      screenHeight*current_resolution,
+      &m_params,
+      250
+      // 100 + 150*current_resolution
+      // 25 + 250*current_resolution
+    );
     render_data(mandel_data, screenWidth*current_resolution, screenHeight*current_resolution, pixels, screenWidth, screenHeight);
   }
 
