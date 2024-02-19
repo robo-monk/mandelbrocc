@@ -1,5 +1,5 @@
 #include "rendering.h"
-#include "sdl_frontend.h"
+#include "frontend.h"
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <stdio.h>
