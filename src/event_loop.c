@@ -8,6 +8,8 @@
 
 void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
 {
+  rendering_setup();
+
   Uint32 startTick, endTick, frame_count = 0;
   Uint32 secondStart = SDL_GetTicks(), fps = 0;
   float frameTimes[FPS_UPDATE_INTERVAL]; // Array to store frame times
