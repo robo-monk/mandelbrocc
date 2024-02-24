@@ -119,8 +119,7 @@ int draw_thread_function(void *ptr) {
 
   while (!SDL_AtomicGet(&data->shutdown)) {
     // Perform drawing operations here
-    draw(data->renderer, data->texture, data->pixels, data->w_width,
-         data->w_height);
+    draw(data->pixels, data->w_width, data->w_height);
     // draw_text(
     //   data->renderer,
     //   font,
