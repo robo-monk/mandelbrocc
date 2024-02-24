@@ -1,5 +1,6 @@
 #include "mandelbrot.h"
 #include "complex.h"
+#include <stdio.h>
 
 mandelbrot_params mandelbrot_params_new(double x, double y, double zoom) {
   mandelbrot_params p = {.focal_x = x, .focal_y = y, .zoom = zoom};
@@ -37,7 +38,9 @@ void calc_bounds(complex *min_c, complex *max_c, complex *focal_point,
 }
 
 void mandelbrot_compute(double *data, int rows, int cols,
-                        mandelbrot_params *params) {
+                        mandelbrot_params *params, process_buffer *process) {
+
+  process->done = 0;
   double aspect_ratio = (double)rows / cols;
   complex min_c = complex_new(0.0, 0.0);
   complex max_c = complex_new(0.0, 0.0);
@@ -50,15 +53,23 @@ void mandelbrot_compute(double *data, int rows, int cols,
 
   int image_x = 0;
   int image_y = 0;
+  int total = cols * rows;
 
   for (double y = min_c.im; y < max_c.im; y += y_incr) {
     for (double x = min_c.re; x < max_c.re; x += x_incr) {
+
       complex current_point = complex_new(x, y);
       double c = run_mandelbrot(&current_point, params->max_iterations);
       image_x += 1;
-      data[(image_y * cols) + image_x] = c;
+      int index = (image_y * cols) + image_x;
+      process->progress = (int)((float)100 * index / (float)total);
+      data[index] = c;
+    }
+    if (process->trigger_stop) {
+      break;
     }
     image_x = 0;
     image_y += 1;
   }
+  process->done = 1;
 }

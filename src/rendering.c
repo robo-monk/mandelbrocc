@@ -40,6 +40,9 @@ void render_stat(SDL_Renderer *renderer, TTF_Font *font, char *s, int x,
 mandelbrot_params m_params = {
     .focal_x = 0.0, .focal_y = 0.0, .zoom = 1.0, .max_iterations = 150};
 mandelbrot_params rendered_m_params;
+
+process_buffer p_buffer = {.progress = 0, .trigger_stop = 0, .done = 1};
+
 // int INITIAL_RESOLUTION = 10;
 // int MAX_RESOLUTION = 160;
 float INITIAL_RESOLUTION = 1.0 / (32.0);
@@ -58,16 +61,24 @@ void draw(Uint32 *pixels, int screenWidth, int screenHeight) {
   if (!mandelbrot_params_eq(&m_params, &rendered_m_params)) {
     current_resolution = INITIAL_RESOLUTION;
     rendered_m_params = m_params;
-    // mandelbrot_render(pixels, screenWidth, screenHeight, &m_params,
-    // current_resolution);
   } else if (current_resolution < 1.0) {
+    // request to render something new
     current_resolution *= 2.0;
+    if (p_buffer.done) {
+      printf("compute... \n");
+      mandelbrot_compute(mandel_data, screenWidth * current_resolution,
+                         screenHeight * current_resolution, &m_params,
+                         &p_buffer);
 
-    mandelbrot_compute(mandel_data, screenWidth * current_resolution,
-                       screenHeight * current_resolution, &m_params);
-    render_data(mandel_data, screenWidth * current_resolution,
-                screenHeight * current_resolution, pixels, screenWidth,
-                screenHeight);
+      if (p_buffer.trigger_stop) {
+        printf("interrupted. skip rendering.");
+        p_buffer.trigger_stop = 0;
+      } else {
+        render_data(mandel_data, screenWidth * current_resolution,
+                    screenHeight * current_resolution, pixels, screenWidth,
+                    screenHeight);
+      }
+    }
   }
 }
 
@@ -80,40 +91,50 @@ void draw_text(SDL_Renderer *renderer, TTF_Font *font, int screenWidth,
   render_stat(renderer, font, focal_stat, 5, 25);
 
   char resolution_stat[64];
-  sprintf(resolution_stat, "(%d) - %d iterations",
-          ((int)(100 * current_resolution)), ((int)(m_params.max_iterations)));
+  sprintf(resolution_stat, "[%d%%] - %d iterations", (p_buffer.progress),
+          ((int)(m_params.max_iterations)));
   render_stat(renderer, font, resolution_stat, 5, 45);
 }
 
 void handle_keyboard_event(SDL_KeyboardEvent *key) {
   double MOVE_SENSITIVITY = .1;
   double move_nip = MOVE_SENSITIVITY / m_params.zoom;
+
   switch (key->keysym.sym) {
   case SDLK_LEFT:
+    p_buffer.trigger_stop = 1;
     m_params.focal_x -= move_nip;
     break;
   case SDLK_RIGHT:
+    p_buffer.trigger_stop = 1;
     m_params.focal_x += move_nip;
     break;
   case SDLK_DOWN:
+    p_buffer.trigger_stop = 1;
     m_params.focal_y -= move_nip;
     break;
   case SDLK_UP:
+    p_buffer.trigger_stop = 1;
     m_params.focal_y += move_nip;
     break;
   case SDLK_EQUALS:
   case SDLK_PLUS:
+    p_buffer.trigger_stop = 1;
     m_params.zoom *= 1.1;
     break;
   case SDLK_MINUS:
+    p_buffer.trigger_stop = 1;
     m_params.zoom /= 1.1;
     break;
   case SDLK_COMMA:
     if (m_params.max_iterations > 10) {
+
+      p_buffer.trigger_stop = 1;
       m_params.max_iterations -= 10;
     }
     break;
   case SDLK_PERIOD:
+    p_buffer.trigger_stop = 1;
     m_params.max_iterations += 10;
     break;
   default:
