@@ -3,15 +3,14 @@
 #include "rendering.h"
 #include "util.h"
 
-#define FPS_UPDATE_INTERVAL 15          // Update FPS every 10 frames, can be changed
-#define TARGET_FPS 60                   // Target FPS, can be changed
+#define FPS_UPDATE_INTERVAL 15 // Update FPS every 10 frames, can be changed
+#define TARGET_FPS 60          // Target FPS, can be changed
 #define FRAME_DELAY (1000 / TARGET_FPS) // Target frame time in milliseconds
 
 int draw_thread_function(void *ptr);
 
 // Structure to pass data to the drawing thread
-typedef struct
-{
+typedef struct {
   SDL_Renderer *renderer;
   SDL_Texture *texture;
   Uint32 *pixels;
@@ -20,8 +19,7 @@ typedef struct
   SDL_atomic_t shutdown;
 } DrawThreadData;
 
-void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
-{
+void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font) {
   rendering_setup();
 
   Uint32 startTick, endTick, frame_count = 0;
@@ -34,34 +32,33 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
   int w_width, w_height;
   SDL_GetWindowSize(window, &w_width, &w_height);
 
-  SDL_Texture *texture = SDL_CreateTexture(renderer,
-                                           SDL_PIXELFORMAT_ARGB8888,
-                                           SDL_TEXTUREACCESS_STREAMING,
-                                           w_width, w_height);
+  SDL_Texture *texture =
+      SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
+                        SDL_TEXTUREACCESS_STREAMING, w_width, w_height);
 
   Uint32 *pixels = malloc(w_width * w_height * sizeof(Uint32));
 
   DrawThreadData data = {renderer, texture, pixels, w_width, w_height};
 
   // Create the drawing thread
-  SDL_Thread *drawThread = SDL_CreateThread(draw_thread_function, "DrawingThread", (void *)&data);
+  SDL_Thread *drawThread =
+      SDL_CreateThread(draw_thread_function, "DrawingThread", (void *)&data);
 
-  while (1)
-  {
+  while (1) {
     startTick = SDL_GetTicks();
 
     SDL_Event event;
-    while (SDL_PollEvent(&event))
-    {
+    while (SDL_PollEvent(&event)) {
       switch (event.type) {
-        case SDL_QUIT:
-          done = SDL_TRUE;
-          break;
-        case SDL_KEYDOWN:
-        case SDL_KEYUP:
-          handle_keyboard_event(&event.key);
-          break;
-        default:break;
+      case SDL_QUIT:
+        done = SDL_TRUE;
+        break;
+      case SDL_KEYDOWN:
+      case SDL_KEYUP:
+        handle_keyboard_event(&event.key);
+        break;
+      default:
+        break;
       }
     }
 
@@ -97,11 +94,9 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
     currentFrame += 1;
     frameTimes[currentFrame % FPS_UPDATE_INTERVAL] = frameTime;
 
-    if (currentFrame % FPS_UPDATE_INTERVAL == 0)
-    {
+    if (currentFrame % FPS_UPDATE_INTERVAL == 0) {
       float totalFrameTime = 0;
-      for (int i = 0; i < FPS_UPDATE_INTERVAL; i++)
-      {
+      for (int i = 0; i < FPS_UPDATE_INTERVAL; i++) {
         totalFrameTime += frameTimes[i];
       }
       fps = (Uint32)(1000.0f / (totalFrameTime / FPS_UPDATE_INTERVAL));
@@ -109,13 +104,7 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
     }
 
     // render_fps(renderer, font, fps);
-
-    // draw_text(
-    //   renderer,
-    //   font,
-    //   w_width,
-    //   w_height
-    // );
+    draw_text(renderer, font, w_width, w_height);
 
     SDL_RenderPresent(renderer);
   }
@@ -124,22 +113,20 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font)
   free(pixels);
 }
 
-int draw_thread_function(void *ptr)
-{
+// this solves nothing since the draw_thread_function still
+int draw_thread_function(void *ptr) {
   DrawThreadData *data = (DrawThreadData *)ptr;
 
-  while (!SDL_AtomicGet(&data->shutdown))
-  {
+  while (!SDL_AtomicGet(&data->shutdown)) {
     // Perform drawing operations here
-    draw(data->renderer, data->texture, data->pixels, data->w_width, data->w_height);
+    draw(data->renderer, data->texture, data->pixels, data->w_width,
+         data->w_height);
     // draw_text(
     //   data->renderer,
     //   font,
     //   w_width,
     //   w_height
     // );
-
-
 
     // SDL_Delay(FRAME_DELAY); // Control the drawing rate
   }
