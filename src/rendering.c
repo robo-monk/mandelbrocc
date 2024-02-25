@@ -1,9 +1,9 @@
 #include "rendering.h"
 #include "frontend.h"
 #include "mandelbrot.h"
-#include "util.h"
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <stdarg.h>
 #include <stdio.h>
 
 // void render_fps(SDL_Renderer *renderer, TTF_Font *font, int fps) {
@@ -52,8 +52,38 @@ double *mandel_data;
 int max_mandel_rows = 1000;
 int max_mandel_cols = 1000;
 
-void rendering_setup() {
+char *text;
+
+typedef struct {
+  char *format_str;
+  int x;
+  int y;
+} TextUI;
+
+SDL_Renderer *renderer;
+TTF_Font *font;
+
+void render_text_ui(TextUI *text_ui, ...) {
+  char str[256];
+  va_list args;
+  va_start(args, text_ui->format_str);
+  vsnprintf(str, sizeof(str), text_ui->format_str, args);
+  va_end(args);
+
+  render_stat(renderer, font, str, text_ui->x, text_ui->y);
+}
+
+void rendering_setup(int screenWidth, int screenHeight,
+                     SDL_Renderer *sdl_renderer, TTF_Font *ttf_font) {
+  free(mandel_data);
+  free(text);
   mandel_data = malloc(max_mandel_cols * max_mandel_rows * sizeof(double));
+
+  // TODO: review this
+  text = malloc(((max_mandel_cols * max_mandel_rows) / 10) * sizeof(char));
+
+  renderer = sdl_renderer;
+  font = ttf_font;
 }
 
 // TODO this should be platfrom agnostic
@@ -62,7 +92,7 @@ void draw(Uint32 *pixels, int screenWidth, int screenHeight) {
     current_resolution = INITIAL_RESOLUTION;
     rendered_m_params = m_params;
   } else if (current_resolution < 1.0) {
-    // request to render something new
+
     current_resolution *= 2.0;
     if (p_buffer.done) {
       printf("compute... \n");
@@ -82,18 +112,18 @@ void draw(Uint32 *pixels, int screenWidth, int screenHeight) {
   }
 }
 
+TextUI focal_point_text = {.format_str = "%f, %fi", .x = 5, .y = 25};
+
+TextUI zoom_text = {.format_str = "zoom: %f", .x = 5, .y = 55};
+
+TextUI process_text = {.format_str = "[%d%%] - %d iterations", .x = 5, .y = 85};
+
 void draw_text(SDL_Renderer *renderer, TTF_Font *font, int screenWidth,
                int screenHeight) {
-  char focal_stat[64];
 
-  sprintf(focal_stat, "%f, %fi @%f", m_params.focal_x, m_params.focal_y,
-          m_params.zoom);
-  render_stat(renderer, font, focal_stat, 5, 25);
-
-  char resolution_stat[64];
-  sprintf(resolution_stat, "[%d%%] - %d iterations", (p_buffer.progress),
-          ((int)(m_params.max_iterations)));
-  render_stat(renderer, font, resolution_stat, 5, 45);
+  render_text_ui(&focal_point_text, m_params.focal_x, m_params.focal_y);
+  render_text_ui(&zoom_text, m_params.zoom);
+  render_text_ui(&process_text, p_buffer.progress, m_params.max_iterations);
 }
 
 void handle_keyboard_event(SDL_KeyboardEvent *key) {
@@ -128,7 +158,6 @@ void handle_keyboard_event(SDL_KeyboardEvent *key) {
     break;
   case SDLK_COMMA:
     if (m_params.max_iterations > 10) {
-
       p_buffer.trigger_stop = 1;
       m_params.max_iterations -= 10;
     }

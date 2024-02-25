@@ -20,7 +20,6 @@ typedef struct {
 } DrawThreadData;
 
 void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font) {
-  rendering_setup();
 
   Uint32 startTick, endTick, frame_count = 0;
   Uint32 secondStart = SDL_GetTicks(), fps = 0;
@@ -31,6 +30,8 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font) {
 
   int w_width, w_height;
   SDL_GetWindowSize(window, &w_width, &w_height);
+
+  rendering_setup(w_width, w_height, renderer, font);
 
   SDL_Texture *texture =
       SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,

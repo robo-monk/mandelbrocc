@@ -57,7 +57,6 @@ void mandelbrot_compute(double *data, int rows, int cols,
 
   for (double y = min_c.im; y < max_c.im; y += y_incr) {
     for (double x = min_c.re; x < max_c.re; x += x_incr) {
-
       complex current_point = complex_new(x, y);
       double c = run_mandelbrot(&current_point, params->max_iterations);
       image_x += 1;
