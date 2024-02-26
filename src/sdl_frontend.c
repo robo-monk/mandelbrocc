@@ -1,73 +1,89 @@
-// #include "sdl_frontend.h"
-// #include "SDL.h"
-// #include "util.h"
+#include "frontend.h"
+#include "rendering.h"
+#include <SDL.h>
+#include <SDL_ttf.h>
+#include <stdarg.h>
 
-// Uint32 rgb(int r, int g, int b)
-// {
-//     Uint32 col = (255 << 24) + (r << 16) + (g << 8) + b; // Assuming ARGB8888 format
-//     return col;
-// }
+SDL_Renderer *renderer;
+TTF_Font *font;
 
-// Uint32 convert_to_col(double *data, double x, double y, int data_rows, int data_cols) {
-//     int x1 = (int) x;
-//     int y1 = (int) y;
+void setup(SDL_Renderer *sdl_renderer, TTF_Font *ttf_font) {
+  renderer = sdl_renderer;
+  font = ttf_font;
+}
 
-//     int x2 = clamp(x1 + 1, 0, data_rows - 1);
-//     int y2 = clamp(y1 + 1, 0, data_cols - 1);
+void render_stat(SDL_Renderer *renderer, TTF_Font *font, char *s, int x,
+                 int y) {
 
-//     double fx = x - x1;
-//     double fy = y - y1;
+  SDL_Color color = {255, 255, 255, 255};
 
-//     double value =
-//         (1 - fx) * (1 - fy) * data[y1 * data_cols + x1] +
-//         fx * (1 - fy) * data[y1 * data_cols + x2] +
-//         (1 - fx) * fy * data[y2 * data_cols + x1] +
-//         fx * fy * data[y2 * data_cols + x2];
-    
-//     // add another layer that will "auto expose"
-//     // the lowest value will be 0 and the highest will be 255
-//     // maybe use some sort of exponential as well.
+  SDL_Surface *surface = TTF_RenderText_Solid(font, s, color);
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
 
-//     return rgb(255*value, 255*value, 255*value);
-// }
+  SDL_Rect textRect = {x, y, surface->w, surface->h};
+  SDL_FreeSurface(surface); // No longer needed
 
-// void render_data(
-//     double *data,
-//     int data_rows, int data_cols,
+  SDL_RenderCopy(renderer, texture, NULL, &textRect);
+  SDL_DestroyTexture(texture); // Clean up
+}
 
-//     Uint32 *pixels,
-//     int image_width, int image_height
-// ) {
-//     // merging 
-//     int data_index = 0;
+void __platform_render_text_ui(TextUI *text_ui, ...) {
+  return;
+  char str[256];
+  va_list args;
+  va_start(args, text_ui->format_str);
+  vsnprintf(str, sizeof(str), text_ui->format_str, args);
+  va_end(args);
 
-//     double aspect_ratio = image_width / image_height;
-//     // for every pixel of the image how much should the index move?
-//     // if we have 30 vertical points and 300 pixels, the index should move 30/300 -> 0.1
-//     // in the future for index 23.1 for example we can do 90% of the index 23 value and 10% of the index 24
+  render_stat(renderer, font, str, text_ui->x, text_ui->y);
+};
 
-//     double data_x_incr = (double) data_rows / (double) image_width;
-//     double data_y_incr = (double) data_cols / (double) image_height;
+void handle_keydown_event(SDL_KeyboardEvent *key) {
+  Action action = NOP;
+  switch (key->keysym.sym) {
+  case SDLK_LEFT:
+    action = LEFT;
+    break;
+  case SDLK_RIGHT:
+    action = RIGHT;
+    break;
+  case SDLK_DOWN:
+    action = DOWN;
+    break;
+  case SDLK_UP:
+    action = UP;
+    break;
+  case SDLK_EQUALS:
+  case SDLK_PLUS:
+    action = ZOOM_IN;
+    break;
+  case SDLK_MINUS:
+    action = ZOOM_OUT;
+    break;
+  case SDLK_COMMA:
+    action = MAX_ITERATIONS_DECR;
+    break;
+  case SDLK_PERIOD:
+    action = MAX_ITERATIONS_INCR;
+    break;
+  default:
+    break;
+  }
 
-//     double data_x = 0;
-//     double data_y = 0;
+  perform_action(action);
+}
 
-//     for (double y = 0; y < image_width; y += 1)
-//     {
-//         for (double x = 0; x < image_height; x += 1)
-//         {
-//             int image_index = y * image_height + x;
+void handle_keyup_event(SDL_KeyboardEvent *key) {
 
-//             long data_x_index = (long) data_x;
-//             double data_x_fractional = data_x - data_x_index;
+  Action action = NOP;
 
-//             long data_y_index = (long) data_y;
-//             double data_y_fractional = data_y - data_y_index;
+  switch (key->keysym.sym) {
+  case SDLK_h:
+    action = HIDE_UI;
+    break;
+  default:
+    break;
+  }
 
-//             pixels[image_index] = convert_to_col(data, data_x, data_y, data_rows, data_cols);
-//             data_x += data_x_incr;
-//         }
-//         data_x = 0;
-//         data_y += data_y_incr;
-//     }
-// }
+  perform_action(action);
+}

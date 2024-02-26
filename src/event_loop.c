@@ -55,8 +55,10 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font) {
         done = SDL_TRUE;
         break;
       case SDL_KEYDOWN:
+        handle_keydown_event(&event.key);
+        break;
       case SDL_KEYUP:
-        handle_keyboard_event(&event.key);
+        handle_keyup_event(&event.key);
         break;
       default:
         break;
