@@ -138,30 +138,17 @@ void render_data(double *data, int data_rows, int data_cols, color *pixels,
 
       double val = kernel_pass(data, data_x, data_y, data_rows, data_cols);
       val = 255 * (val * val);
-      // printf("val: %f \n", val);
       pixels[image_index] = rgb(val, val, val);
-      // kernel_pass(data, data_x, data_y, data_rows, data_cols);
-
       data_x += data_x_incr;
     }
     data_x = 0;
     data_y += data_y_incr;
   }
-
-  // normalize(data, data_rows * data_cols, 0.0, 255.0);
 }
 
 void __format_text_ui(TextUI *text_ui, ...) {
-  // char str[256];
   va_list args;
   va_start(args, text_ui->format_str);
-  printf("size of text_ui->str %d \n", sizeof(text_ui->str));
-  
-  // if (sizeof(text_ui->str) < sizeof(char) * 256) {
-  //   text_ui->str = malloc(sizeof(char) * 256);
-  // }
-
-  vsnprintf(text_ui->str, 512*sizeof(char), text_ui->format_str, args);
+  vsnprintf(text_ui->str, (512*sizeof(char)), text_ui->format_str, args);
   va_end(args);
-  // text_ui->str = str;
 }

@@ -43,17 +43,27 @@ void action_listeners() {
 
 int screenWidth, screenHeight;
 unsigned int *pixels;
+int _quit = 0;
 // unsigned int pixels[5000*1000];
 
 void *draw_loop() {
-  while (1) {
+  while (!_quit) {
     draw(pixels, screenWidth, screenHeight);
   }
 }
 
+void thread_function(int thread_count, ) {
+  pthread_t *thread_ids = malloc(sizeof(pthread_t) * thread_count);
+
+  for (int i = 0; i < thread_count; i++) {
+  }
+
+  free(thread_ids);
+}
+
 int main() {
-  screenWidth = 400;
-  screenHeight = 400;
+  screenWidth = 800;
+  screenHeight = 800;
 
   pixels = malloc(screenHeight * screenWidth * sizeof(unsigned int));
 
@@ -84,6 +94,7 @@ int main() {
     EndDrawing();
   }
 
+  _quit = 1;
   pthread_join(thread_id, NULL);
   UnloadTexture(texture); // Unload texture
   free(pixels);
