@@ -18,47 +18,70 @@ int max_mandel_cols = 1000;
 
 char *text;
 
-void rendering_setup(int screenWidth, int screenHeight) {
+TextUI focal_point_text, zoom_text, process_text;
+
+void rendering_setup(int screenWidth, int screenHeight)
+{
   free(mandel_data);
   mandel_data = malloc(screenHeight * screenWidth * max_mandel_rows * sizeof(double));
+
+  focal_point_text = new_text_ui("%f, %fi", 5, 25);
+  zoom_text = new_text_ui("zoom: %f", 5, 55);
+  process_text = new_text_ui("%d iterations -- [%d%%]", 5, 85);
+}
+
+TextUI new_text_ui(char *fmt_string, int x, int y)
+{
+  TextUI txt_ui = {
+      .format_str = fmt_string, .x = x, .y = y};
+
+  txt_ui.str = malloc(512 * sizeof(char));
+  return txt_ui;
 }
 
 int hide_ui = 0;
-TextUI focal_point_text = {.format_str = "%f, %fi", .x = 5, .y = 25};
 
-TextUI zoom_text = {.format_str = "zoom: %f", .x = 5, .y = 55};
-
-TextUI process_text = {
-    .format_str = "%d iterations -- [%d%%]", .x = 5, .y = 85};
-
-void draw_text() {
+void draw_text()
+{
   if (hide_ui)
     return;
 
-  __platform_render_text_ui(&focal_point_text, m_params.focal_x,
-                            m_params.focal_y);
-  __platform_render_text_ui(&zoom_text, m_params.zoom);
-  __platform_render_text_ui(&process_text, m_params.max_iterations,
-                            p_buffer.progress);
+  __format_text_ui(&focal_point_text, m_params.focal_x,
+                   m_params.focal_y);
+  __format_text_ui(&zoom_text, m_params.zoom);
+  __format_text_ui(&process_text, m_params.max_iterations,
+                   p_buffer.progress);
+
+  __platform_render_text_ui(&focal_point_text);
+  __platform_render_text_ui(&zoom_text);
+  __platform_render_text_ui(&process_text);
 }
 
-void draw(color *pixels, int screenWidth, int screenHeight) {
-  if (!mandelbrot_params_eq(&m_params, &rendered_m_params)) {
+void draw(color *pixels, int screenWidth, int screenHeight)
+{
+  if (!mandelbrot_params_eq(&m_params, &rendered_m_params))
+  {
     current_resolution = INITIAL_RESOLUTION;
     rendered_m_params = m_params;
-  } else if (current_resolution < 1.0) {
+  }
+  else if (current_resolution < 1.0)
+  {
 
     current_resolution *= 2.0;
-    if (p_buffer.done) {
+    if (p_buffer.done)
+    {
       printf("(%f) compute... \n", current_resolution);
       mandelbrot_compute(mandel_data, screenWidth * current_resolution,
                          screenHeight * current_resolution, &m_params,
                          &p_buffer);
       printf("(%f) done computing... \n", current_resolution);
-      if (p_buffer.trigger_stop) {
+      if (p_buffer.trigger_stop)
+      {
         printf("interrupted. skip rendering. \n");
         p_buffer.trigger_stop = 0;
-      } else {
+      }
+      else
+      {
         render_data(mandel_data, screenWidth * current_resolution,
                     screenHeight * current_resolution, pixels, screenWidth,
                     screenHeight);
@@ -67,13 +90,15 @@ void draw(color *pixels, int screenWidth, int screenHeight) {
   }
 }
 
-void perform_action(Action action) {
+void perform_action(Action action)
+{
   if (action == NOP)
     return;
   double MOVE_SENSITIVITY = .1;
   double move_nip = MOVE_SENSITIVITY / m_params.zoom;
 
-  switch (action) {
+  switch (action)
+  {
   case ACTION_LEFT:
     p_buffer.trigger_stop = 1;
     m_params.focal_x -= move_nip;
@@ -99,7 +124,8 @@ void perform_action(Action action) {
     m_params.zoom /= 1.1;
     break;
   case MAX_ITERATIONS_DECR:
-    if (m_params.max_iterations > 10) {
+    if (m_params.max_iterations > 10)
+    {
       p_buffer.trigger_stop = 1;
       m_params.max_iterations -= 10;
     }

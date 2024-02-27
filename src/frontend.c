@@ -2,6 +2,8 @@
 // #include "sdl_frontend.h"
 #include "util.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
 
 color rgb(int r, int g, int b) {
   color col =
@@ -147,4 +149,19 @@ void render_data(double *data, int data_rows, int data_cols, color *pixels,
   }
 
   // normalize(data, data_rows * data_cols, 0.0, 255.0);
+}
+
+void __format_text_ui(TextUI *text_ui, ...) {
+  // char str[256];
+  va_list args;
+  va_start(args, text_ui->format_str);
+  printf("size of text_ui->str %d \n", sizeof(text_ui->str));
+  
+  // if (sizeof(text_ui->str) < sizeof(char) * 256) {
+  //   text_ui->str = malloc(sizeof(char) * 256);
+  // }
+
+  vsnprintf(text_ui->str, 512*sizeof(char), text_ui->format_str, args);
+  va_end(args);
+  // text_ui->str = str;
 }

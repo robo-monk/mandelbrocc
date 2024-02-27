@@ -92,13 +92,11 @@ int main() {
   return 0;
 }
 
-void __platform_render_text_ui(TextUI *text_ui, ...) {
-
-  char str[256];
-  va_list args;
-  va_start(args, text_ui->format_str);
-  vsnprintf(str, sizeof(str), text_ui->format_str, args);
-  va_end(args);
-
-  DrawText(str, text_ui->x, text_ui->y, 12, GREEN);
+void __platform_render_text_ui(TextUI *text_ui) {
+  // char str[256];
+  // va_list args;
+  // va_start(args, text_ui->format_str);
+  // vsnprintf(str, sizeof(str), text_ui->format_str, args);
+  // va_end(args);
+  DrawText(text_ui->str, text_ui->x, text_ui->y, 12, GREEN);
 }
