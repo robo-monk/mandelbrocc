@@ -1,6 +1,7 @@
 #include "event_loop.h"
 #include "SDL_thread.h"
 #include "rendering.h"
+#include "sdl_frontend.h"
 #include "util.h"
 
 #define FPS_UPDATE_INTERVAL 15 // Update FPS every 10 frames, can be changed
@@ -31,7 +32,8 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font) {
   int w_width, w_height;
   SDL_GetWindowSize(window, &w_width, &w_height);
 
-  rendering_setup(w_width, w_height, renderer, font);
+  __sdl_setup(renderer, font);
+  rendering_setup(w_width, w_height);
 
   SDL_Texture *texture =
       SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
@@ -71,7 +73,7 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font) {
     }
 
     // SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    SDL_RenderClear(renderer);
+    // SDL_RenderClear(renderer);
 
     // TODO dynamically adjust width and height
     // int w_width, w_height;
@@ -88,28 +90,27 @@ void event_loop(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font) {
     //   w_height
     // );
 
-    SDL_UpdateTexture(texture, NULL, pixels, w_width * sizeof(Uint32));
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    // SDL_UpdateTexture(texture, NULL, pixels, w_width * sizeof(Uint32));
+    // SDL_RenderCopy(renderer, texture, NULL, NULL);
+
+    // draw(data.pixels, data.w_width, data.w_height);
 
     endTick = SDL_GetTicks();
 
-    Uint32 frameTime = endTick - startTick;
-    currentFrame += 1;
-    frameTimes[currentFrame % FPS_UPDATE_INTERVAL] = frameTime;
+    // Uint32 frameTime = endTick - startTick;
+    // currentFrame += 1;
+    // frameTimes[currentFrame % FPS_UPDATE_INTERVAL] = frameTime;
 
-    if (currentFrame % FPS_UPDATE_INTERVAL == 0) {
-      float totalFrameTime = 0;
-      for (int i = 0; i < FPS_UPDATE_INTERVAL; i++) {
-        totalFrameTime += frameTimes[i];
-      }
-      fps = (Uint32)(1000.0f / (totalFrameTime / FPS_UPDATE_INTERVAL));
-      currentFrame = 0;
-    }
+    // if (currentFrame % FPS_UPDATE_INTERVAL == 0) {
+    //   float totalFrameTime = 0;
+    //   for (int i = 0; i < FPS_UPDATE_INTERVAL; i++) {
+    //     totalFrameTime += frameTimes[i];
+    //   }
+    //   fps = (Uint32)(1000.0f / (totalFrameTime / FPS_UPDATE_INTERVAL));
+    //   currentFrame = 0;
+    // }
 
-    // render_fps(renderer, font, fps);
-    draw_text(renderer, font, w_width, w_height);
-
-    SDL_RenderPresent(renderer);
+    // SDL_RenderPresent(renderer);
   }
 
   SDL_WaitThread(drawThread, NULL);
@@ -122,7 +123,17 @@ int draw_thread_function(void *ptr) {
 
   while (!SDL_AtomicGet(&data->shutdown)) {
     // Perform drawing operations here
+
+    SDL_RenderClear(data->renderer);
+    // SDL_SetRenderTarget(data->renderer, data->texture);
+
     draw(data->pixels, data->w_width, data->w_height);
+
+    SDL_UpdateTexture(data->texture, NULL, data->pixels,
+                      data->w_width * sizeof(Uint32));
+
+    SDL_RenderCopy(data->renderer, data->texture, NULL, NULL);
+    SDL_RenderPresent(data->renderer);
     // draw_text(
     //   data->renderer,
     //   font,

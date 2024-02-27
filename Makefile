@@ -1,6 +1,7 @@
 # Define compiler and flags
 CC = clang
-CFLAGS = -Wall -Wextra $(shell sdl2-config --cflags)
+CFLAGS = -Wall -Wextra $(shell sdl2-config --cflags) -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL
+
 LIBS = $(shell sdl2-config --libs) -lSDL2_ttf
 
 # Define source, object, and binary directories

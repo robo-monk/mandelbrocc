@@ -31,16 +31,16 @@ TextUI zoom_text = {.format_str = "zoom: %f", .x = 5, .y = 55};
 TextUI process_text = {
     .format_str = "%d iterations -- [%d%%]", .x = 5, .y = 85};
 
-void draw_text() {
-  if (hide_ui)
-    return;
+// void draw_text() {
+//   if (hide_ui)
+//     return;
 
-  __platform_render_text_ui(&focal_point_text, m_params.focal_x,
-                            m_params.focal_y);
-  __platform_render_text_ui(&zoom_text, m_params.zoom);
-  __platform_render_text_ui(&process_text, m_params.max_iterations,
-                            p_buffer.progress);
-}
+//   __platform_render_text_ui(&focal_point_text, m_params.focal_x,
+//                             m_params.focal_y);
+//   __platform_render_text_ui(&zoom_text, m_params.zoom);
+//   __platform_render_text_ui(&process_text, m_params.max_iterations,
+//                             p_buffer.progress);
+// }
 
 void draw(color *pixels, int screenWidth, int screenHeight) {
   if (!mandelbrot_params_eq(&m_params, &rendered_m_params)) {
@@ -66,7 +66,7 @@ void draw(color *pixels, int screenWidth, int screenHeight) {
     }
   }
 
-  draw_text();
+  // draw_text();
 }
 
 void perform_action(Action action) {

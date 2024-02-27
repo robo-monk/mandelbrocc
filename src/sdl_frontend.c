@@ -1,3 +1,4 @@
+#include "sdl_frontend.h"
 #include "frontend.h"
 #include "rendering.h"
 #include <SDL.h>
@@ -7,17 +8,16 @@
 SDL_Renderer *renderer;
 TTF_Font *font;
 
-void setup(SDL_Renderer *sdl_renderer, TTF_Font *ttf_font) {
+void __sdl_setup(SDL_Renderer *sdl_renderer, TTF_Font *ttf_font) {
   renderer = sdl_renderer;
   font = ttf_font;
 }
 
-void render_stat(SDL_Renderer *renderer, TTF_Font *font, char *s, int x,
-                 int y) {
+void render_stat(char *s, int x, int y) {
+  // return;
+  SDL_Color c = {255, 255, 255, 255};
 
-  SDL_Color color = {255, 255, 255, 255};
-
-  SDL_Surface *surface = TTF_RenderText_Solid(font, s, color);
+  SDL_Surface *surface = TTF_RenderText_Solid(font, s, c);
   SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
 
   SDL_Rect textRect = {x, y, surface->w, surface->h};
@@ -28,14 +28,13 @@ void render_stat(SDL_Renderer *renderer, TTF_Font *font, char *s, int x,
 }
 
 void __platform_render_text_ui(TextUI *text_ui, ...) {
-  return;
   char str[256];
   va_list args;
   va_start(args, text_ui->format_str);
   vsnprintf(str, sizeof(str), text_ui->format_str, args);
   va_end(args);
 
-  render_stat(renderer, font, str, text_ui->x, text_ui->y);
+  render_stat(str, text_ui->x, text_ui->y);
 };
 
 void handle_keydown_event(SDL_KeyboardEvent *key) {

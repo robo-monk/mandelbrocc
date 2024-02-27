@@ -27,8 +27,7 @@ typedef struct {
 
 typedef unsigned int color;
 
-typedef void (*PlatformRenderTextFn)(TextUI *text_ui, ...);
-void __platform_render_text_ui(TextUI *text_ui, ...);
+// typedef void (*PlatformRenderTextFn)(TextUI *text_ui, ...);
 
 color rgb(int r, int g, int b);
 
@@ -38,4 +37,5 @@ color convert_to_col(double *data, double x, double y, int data_rows,
 void render_data(double *data, int data_rows, int data_cols, color *pixels,
                  int image_width, int image_height);
 
+void __platform_render_text_ui(TextUI *text_ui, ...);
 #endif
