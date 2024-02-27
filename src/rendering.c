@@ -20,7 +20,7 @@ char *text;
 
 void rendering_setup(int screenWidth, int screenHeight) {
   free(mandel_data);
-  mandel_data = malloc(max_mandel_cols * max_mandel_rows * sizeof(double));
+  mandel_data = malloc(screenHeight * screenWidth * max_mandel_rows * sizeof(double));
 }
 
 int hide_ui = 0;
@@ -50,13 +50,13 @@ void draw(color *pixels, int screenWidth, int screenHeight) {
 
     current_resolution *= 2.0;
     if (p_buffer.done) {
-      printf("compute... \n");
+      printf("(%f) compute... \n", current_resolution);
       mandelbrot_compute(mandel_data, screenWidth * current_resolution,
                          screenHeight * current_resolution, &m_params,
                          &p_buffer);
-
+      printf("(%f) done computing... \n", current_resolution);
       if (p_buffer.trigger_stop) {
-        printf("interrupted. skip rendering.");
+        printf("interrupted. skip rendering. \n");
         p_buffer.trigger_stop = 0;
       } else {
         render_data(mandel_data, screenWidth * current_resolution,
@@ -65,8 +65,6 @@ void draw(color *pixels, int screenWidth, int screenHeight) {
       }
     }
   }
-
-  draw_text();
 }
 
 void perform_action(Action action) {

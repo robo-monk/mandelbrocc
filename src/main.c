@@ -2,8 +2,10 @@
 #include "../include/raylib.h"
 #include "frontend.h"
 #include "rendering.h"
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/_pthread/_pthread_t.h>
 
 void action_listeners() {
 
@@ -39,25 +41,39 @@ void action_listeners() {
   }
 }
 
+int screenWidth, screenHeight;
+unsigned int *pixels;
+// unsigned int pixels[5000*1000];
+
+void *draw_loop() {
+  while (1) {
+    draw(pixels, screenWidth, screenHeight);
+  }
+}
+
 int main() {
-  int screenWidth = 600;
-  int screenHeight = 600;
+  screenWidth = 400;
+  screenHeight = 400;
+
+  pixels = malloc(screenHeight * screenWidth * sizeof(unsigned int));
 
   InitWindow(screenWidth, screenHeight, "Mandelbrocc");
   SetTargetFPS(60);
 
-  unsigned int pixels[screenWidth * screenHeight]; // Your pixel data
   rendering_setup(screenWidth, screenHeight);
 
   Image image = GenImageWhiteNoise(screenWidth, screenHeight, 0.1);
   Texture2D texture = LoadTextureFromImage(image);
+
+  pthread_t thread_id; // Variable to hold the thread ID
+  int result = pthread_create(&thread_id, NULL, draw_loop, NULL);
 
   while (!WindowShouldClose()) {
     BeginDrawing();
     ClearBackground(BLACK);
 
     action_listeners();
-    draw(pixels, screenWidth, screenHeight);
+    // draw(pixels, screenWidth, screenHeight);
 
     UpdateTexture(texture, pixels);
     DrawTexture(texture, 0, 0, WHITE);
@@ -68,7 +84,9 @@ int main() {
     EndDrawing();
   }
 
+  pthread_join(thread_id, NULL);
   UnloadTexture(texture); // Unload texture
+  free(pixels);
   CloseWindow();
 
   return 0;
