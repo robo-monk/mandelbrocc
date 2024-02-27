@@ -41,23 +41,23 @@ void handle_keydown_event(SDL_KeyboardEvent *key) {
   Action action = NOP;
   switch (key->keysym.sym) {
   case SDLK_LEFT:
-    action = LEFT;
+    action = ACTION_LEFT;
     break;
   case SDLK_RIGHT:
-    action = RIGHT;
+    action = ACTION_RIGHT;
     break;
   case SDLK_DOWN:
-    action = DOWN;
+    action = ACTION_DOWN;
     break;
   case SDLK_UP:
-    action = UP;
+    action = ACTION_UP;
     break;
   case SDLK_EQUALS:
   case SDLK_PLUS:
-    action = ZOOM_IN;
+    action = ACTION_ZOOM_IN;
     break;
   case SDLK_MINUS:
-    action = ZOOM_OUT;
+    action = ACTION_ZOOM_OUT;
     break;
   case SDLK_COMMA:
     action = MAX_ITERATIONS_DECR;

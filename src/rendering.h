@@ -5,6 +5,7 @@
 
 void rendering_setup(int screenWidth, int screenHeight);
 void draw(unsigned int *pixels, int screenWidth, int screenHeight);
+void draw_text();
 void perform_action(Action action);
 
 #endif
