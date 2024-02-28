@@ -1,5 +1,5 @@
 // #include "application.h"
-#include "../include/raylib.h"
+#include "../lib/raylib/raylib.h"
 #include "frontend.h"
 #include "rendering.h"
 #include <pthread.h>
