@@ -18,7 +18,7 @@ int max_mandel_cols = 1000;
 
 char *text;
 
-TextUI focal_point_text, zoom_text, process_text;
+TextUI focal_point_text, zoom_text, process_text, iterations_text;
 
 void rendering_setup(int screenWidth, int screenHeight)
 {
@@ -26,8 +26,9 @@ void rendering_setup(int screenWidth, int screenHeight)
   mandel_data = malloc(screenHeight * screenWidth * max_mandel_rows * sizeof(double));
 
   focal_point_text = new_text_ui("%f, %fi", 5, 25);
-  zoom_text = new_text_ui("zoom: %f", 5, 55);
-  process_text = new_text_ui("%d iterations -- [%d%%]", 5, 85);
+  zoom_text = new_text_ui("zoom: %f", 5, 45);
+  iterations_text = new_text_ui("%d iterations", 5, 65);
+  process_text = new_text_ui("render@%.2f  %d%%", 5, 85);
 }
 
 TextUI new_text_ui(char *fmt_string, int x, int y)
@@ -49,12 +50,16 @@ void draw_text()
   __format_text_ui(&focal_point_text, m_params.focal_x,
                    m_params.focal_y);
   __format_text_ui(&zoom_text, m_params.zoom);
-  __format_text_ui(&process_text, m_params.max_iterations,
-                   p_buffer.progress);
+
+  __format_text_ui(&process_text, current_resolution,
+                    p_buffer.progress);
+
+  __format_text_ui(&iterations_text, m_params.max_iterations);
 
   __platform_render_text_ui(&focal_point_text);
   __platform_render_text_ui(&zoom_text);
   __platform_render_text_ui(&process_text);
+  __platform_render_text_ui(&iterations_text);
 }
 
 void draw(color *pixels, int screenWidth, int screenHeight)
@@ -70,6 +75,7 @@ void draw(color *pixels, int screenWidth, int screenHeight)
     current_resolution *= 2.0;
     if (p_buffer.done)
     {
+      p_buffer.progress = 0;
       printf("(%f) compute... \n", current_resolution);
       mandelbrot_compute(mandel_data, screenWidth * current_resolution,
                          screenHeight * current_resolution, &m_params,
@@ -94,7 +100,7 @@ void perform_action(Action action)
 {
   if (action == NOP)
     return;
-  double MOVE_SENSITIVITY = .1;
+  double MOVE_SENSITIVITY = .05;
   double move_nip = MOVE_SENSITIVITY / m_params.zoom;
 
   switch (action)
@@ -109,11 +115,11 @@ void perform_action(Action action)
     break;
   case ACTION_DOWN:
     p_buffer.trigger_stop = 1;
-    m_params.focal_y -= move_nip;
+    m_params.focal_y += move_nip;
     break;
   case ACTION_UP:
     p_buffer.trigger_stop = 1;
-    m_params.focal_y += move_nip;
+    m_params.focal_y -= move_nip;
     break;
   case ACTION_ZOOM_IN:
     p_buffer.trigger_stop = 1;

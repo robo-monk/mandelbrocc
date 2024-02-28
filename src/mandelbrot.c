@@ -161,7 +161,7 @@ void mandelbrot_compute(double *data, int rows, int cols,
     points[i] = complex_new(x, y);
   }
 
-  const int threads = 100;
+  const int threads = 420;
   pthread_t *thread_ids = malloc(sizeof(pthread_t) * threads);
 
   printf("calculing the subgrid using %d threads;", threads);
@@ -193,6 +193,7 @@ void mandelbrot_compute(double *data, int rows, int cols,
   for (int pth = 0; pth < threads; pth++)
   {
     pthread_join(thread_ids[pth], NULL);
+    process->progress = 100*((pth+1)/(double)threads);
   }
 
   free(p); // Assuming you store the pointers in an array or similar
