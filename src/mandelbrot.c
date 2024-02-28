@@ -45,60 +45,6 @@ void calc_bounds(complex *min_c, complex *max_c, complex *focal_point,
   max_c->im = focal_point->im + (1.0 / zoom);
 }
 
-typedef struct
-{
-  complex max_c;
-  complex min_c;
-
-  int image_x;
-  int image_y;
-
-  int rows;
-  int cols;
-  int total_rows;
-
-  unsigned int max_iterations;
-
-} mandelbrot_compute_subgrid_params;
-
-void mandelbrot_compute_subgrid(mandelbrot_compute_subgrid_params *subgrid_params, double *data, process_buffer *process)
-{
-  double x_incr = (subgrid_params->max_c.re - subgrid_params->min_c.re) / ((double)subgrid_params->rows);
-  double y_incr = (subgrid_params->max_c.im - subgrid_params->min_c.im) / ((double)subgrid_params->cols);
-
-  int image_x = subgrid_params->image_x;
-  int image_y = subgrid_params->image_y;
-
-  int total = subgrid_params->cols * subgrid_params->rows;
-
-  printf("x: %d | y: %d \n\n", image_x, image_y);
-
-  // data[image_x + (image_y*subgrid_params->total_rows)] = 1;
-  // return;
-
-  for (double y = subgrid_params->min_c.im; y < subgrid_params->max_c.im; y += y_incr)
-  {
-    for (double x = subgrid_params->min_c.re; x < subgrid_params->max_c.re; x += x_incr)
-    {
-      complex current_point = complex_new(x, y);
-      double c = run_mandelbrot(&current_point, subgrid_params->max_iterations);
-      image_x += 1;
-      int index = (image_y * subgrid_params->total_rows) + image_x;
-      // int index = image_y + image_x;
-      // int index = (600*image_y) + image_x;
-      process->progress = (int)((float)100 * index / (float)total);
-      data[index] = c;
-      // data[index] = image_y;
-    }
-    if (process->trigger_stop)
-    {
-      break;
-    }
-    image_x = 0;
-    image_y += 1;
-  }
-}
-
 void run_mandelbrot_for_subgrid(complex *points, double *data, int idx_start, int idx_end, mandelbrot_params *params, process_buffer *process)
 {
   for (int pi = idx_start; pi < idx_end; pi++)

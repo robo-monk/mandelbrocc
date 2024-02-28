@@ -11,12 +11,6 @@ color rgb(int r, int g, int b) {
   return col;
 }
 
-color convert_to_col_no_kernel(double *data, double x, double y, int data_rows,
-                               int data_cols) {
-  double value = data[(int)y * data_cols + (int)x];
-  return rgb(255 * value, 255 * value, 255 * value);
-}
-
 // blur pass
 double kernel_pass(double *data, double x, double y, int data_rows,
                    int data_cols) {
@@ -35,76 +29,6 @@ double kernel_pass(double *data, double x, double y, int data_rows,
                  fx * fy * data[y2 * data_cols + x2];
 
   return value;
-}
-
-// color kernel_pass(double *data, double x, double y, int data_rows,
-//                   int data_cols) {
-
-//   int x1 = (int)x;
-//   int y1 = (int)y;
-
-//   int x2 = clamp(x1 + 1, 0, data_rows - 1);
-//   int y2 = clamp(y1 + 1, 0, data_cols - 1);
-
-//   double fx = x - x1;
-//   double fy = y - y1;
-
-//   double value = (1 - fx) * (1 - fy) * data[y1 * data_cols + x1] +
-//                  fx * (1 - fy) * data[y1 * data_cols + x2] +
-//                  (1 - fx) * fy * data[y2 * data_cols + x1] +
-//                  fx * fy * data[y2 * data_cols + x2];
-
-//   return value;
-// }
-
-void find_min_max(double *data, int len, double *min, double *max) {
-  for (int i = 0; i < len; i++) {
-    double curr_val = data[i];
-    if (curr_val > *max) {
-      *max = data[i];
-    }
-    if (curr_val < *min) {
-      *min = data[i];
-    }
-  }
-}
-
-void normalize(double *data, int len, double low_bound, double high_bound) {
-  double min, max;
-  find_min_max(data, len, &min, &max);
-  printf("min %f, max %f", min, max);
-
-  double diff = high_bound - low_bound;
-  double diff_array = max - min;
-
-  for (int i = 0; i < len; i++) {
-    double curr_val = data[i];
-    double temp = (((data[i] - min) * diff) / diff_array) + low_bound;
-    // data[i] = temp;
-    data[i] = temp;
-  }
-}
-
-color convert_to_col(double *data, double x, double y, int data_rows,
-                     int data_cols) {
-  int x1 = (int)x;
-  int y1 = (int)y;
-
-  int x2 = clamp(x1 + 1, 0, data_rows - 1);
-  int y2 = clamp(y1 + 1, 0, data_cols - 1);
-
-  double fx = x - x1;
-  double fy = y - y1;
-
-  double value = (1 - fx) * (1 - fy) * data[y1 * data_cols + x1] +
-                 fx * (1 - fy) * data[y1 * data_cols + x2] +
-                 (1 - fx) * fy * data[y2 * data_cols + x1] +
-                 fx * fy * data[y2 * data_cols + x2];
-
-  // add another layer that will "auto expose"
-  // the lowest value will be 0 and the highest will be 255
-  // maybe use some sort of exponential as well.
-  return rgb(255 * value, 255 * value, 255 * value);
 }
 
 void render_data(double *data, int data_rows, int data_cols, color *pixels,
