@@ -52,15 +52,6 @@ void *draw_loop() {
   }
 }
 
-void thread_function(int thread_count, ) {
-  pthread_t *thread_ids = malloc(sizeof(pthread_t) * thread_count);
-
-  for (int i = 0; i < thread_count; i++) {
-  }
-
-  free(thread_ids);
-}
-
 int main() {
   screenWidth = 800;
   screenHeight = 800;
