@@ -1,4 +1,4 @@
-# README
+# Mandelbrocc
 
 ## Todo
 - [x] autoexposure - normalize values
@@ -12,3 +12,8 @@
 
 ## Installation
 For the desktop version you need to place a static raylib library in lib/raylib. The repo contains one compiled for M1 Pro Mac. Potentially you need to replace it for your machine.
+
+## Run it
+```
+./build.sh && ./build/mandel
+```

@@ -15,8 +15,6 @@ for SOURCE in $SOURCES; do
     time clang -c "src/$SOURCE" -o $(echo $SOURCE | sed 's/\.c/\.o/')
 done
 
-# clang -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL src/main.c src/raylib/src/libraylib.a -o build/mandel
-
 # Link all object files into a single executable
 echo "Linking..."
 clang lib/raylib/libraylib.a $OBJECTS -o build/mandel -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL
