@@ -1,6 +1,7 @@
 #include "mandelbrot.h"
 #include "complex.h"
 #include <stdio.h>
+#include <pthread.h>
 #include <stdlib.h>
 
 mandelbrot_params mandelbrot_params_new(double x, double y, double zoom)
@@ -98,6 +99,41 @@ void mandelbrot_compute_subgrid(mandelbrot_compute_subgrid_params *subgrid_param
   }
 }
 
+void run_mandelbrot_for_subgrid(complex *points, double *data, int idx_start, int idx_end, mandelbrot_params *params, process_buffer *process)
+{
+  for (int pi = idx_start; pi < idx_end; pi++)
+  {
+    double d = run_mandelbrot(&points[pi], params->max_iterations);
+    data[pi] = d;
+    if (process->trigger_stop)
+    {
+      break;
+    }
+  }
+}
+
+typedef struct
+{
+  complex *points;
+  double *data;
+  int idx_start;
+  int idx_end;
+  mandelbrot_params *params;
+  process_buffer *process;
+} SubgridComputeParams;
+
+void _thread_mandelbrot_subgrid_compute(SubgridComputeParams *params)
+{
+  run_mandelbrot_for_subgrid(params->points, params->data, params->idx_start, params->idx_end, params->params, params->process);
+}
+
+pthread_t thread_mandelbrot_subgrid_compute(SubgridComputeParams *p)
+{
+  pthread_t thread_id; // Variable to hold the thread ID
+  int result = pthread_create(&thread_id, NULL, _thread_mandelbrot_subgrid_compute, p);
+  return thread_id;
+}
+
 void mandelbrot_compute(double *data, int rows, int cols,
                         mandelbrot_params *params, process_buffer *process)
 {
@@ -111,28 +147,56 @@ void mandelbrot_compute(double *data, int rows, int cols,
   calc_bounds(&min_c, &max_c, &focal_point, params->zoom, aspect_ratio);
 
   int total = rows * cols;
-  double x_incr = (double) (max_c.re - min_c.re) / (double) cols;
-  double y_incr = (double) (max_c.im - min_c.im) / (double) rows;
+  double x_incr = (double)(max_c.re - min_c.re) / (double)cols;
+  double y_incr = (double)(max_c.im - min_c.im) / (double)rows;
 
-  complex *points = malloc(total*(sizeof(complex)));
+  complex *points = malloc(total * (sizeof(complex)));
 
-  for (int i = 0; i < total; i++) {
+  for (int i = 0; i < total; i++)
+  {
     int y_idx = i / cols;
     int x_idx = i % cols;
     double y = min_c.im + y_idx * y_incr;
     double x = min_c.re + x_idx * x_incr;
     points[i] = complex_new(x, y);
   }
- 
-  for (int pi = 0; pi < total; pi++) {
-    double d = run_mandelbrot(&points[pi], params->max_iterations);
-    data[pi] = d;
-    if (process->trigger_stop)
+
+  const int threads = 100;
+  pthread_t *thread_ids = malloc(sizeof(pthread_t) * threads);
+
+  printf("calculing the subgrid using %d threads;", threads);
+  int points_per_thread = total / threads;
+
+  SubgridComputeParams *p;
+  for (int pth = 0; pth < threads; pth++)
+  {
+    p = malloc(sizeof(SubgridComputeParams)); // Dynamically allocate memory for the parameters
+
+    int idx_start = pth * points_per_thread;
+    int idx_end = (pth + 1) * points_per_thread;
+    if (idx_end >= total)
     {
-      break;
+      idx_end = total - 1;
     }
+
+    *p = (SubgridComputeParams){
+        .data = data,
+        .idx_start = idx_start,
+        .idx_end = idx_end,
+        .params = params,
+        .points = points,
+        .process = process};
+
+    thread_ids[pth] = thread_mandelbrot_subgrid_compute(p);
   }
 
+  for (int pth = 0; pth < threads; pth++)
+  {
+    pthread_join(thread_ids[pth], NULL);
+  }
+
+  free(p); // Assuming you store the pointers in an array or similar
+  free(thread_ids);
   free(points);
   process->done = 1;
 }
