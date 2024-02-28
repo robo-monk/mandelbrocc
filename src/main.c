@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <sys/_pthread/_pthread_t.h>
 
-void action_listeners() {
+void process_input_actions() {
 
   const int len_actions = 8;
   const int action_keys[] = {
@@ -73,32 +73,25 @@ int main() {
     BeginDrawing();
     ClearBackground(BLACK);
 
-    action_listeners();
-    // draw(pixels, screenWidth, screenHeight);
+    process_input_actions();
 
     UpdateTexture(texture, pixels);
     DrawTexture(texture, 0, 0, WHITE);
 
     DrawText(TextFormat("%02.02f ms", GetFrameTime() * 1000), 5, 5, 12, GREEN);
-    draw_text();
 
+    draw_text();
     EndDrawing();
   }
 
   _quit = 1;
   pthread_join(thread_id, NULL);
-  UnloadTexture(texture); // Unload texture
+  UnloadTexture(texture);
   free(pixels);
   CloseWindow();
-
   return 0;
 }
 
 void __platform_render_text_ui(TextUI *text_ui) {
-  // char str[256];
-  // va_list args;
-  // va_start(args, text_ui->format_str);
-  // vsnprintf(str, sizeof(str), text_ui->format_str, args);
-  // va_end(args);
   DrawText(text_ui->str, text_ui->x, text_ui->y, 12, GREEN);
 }
