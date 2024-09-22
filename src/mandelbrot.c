@@ -76,7 +76,7 @@ void _thread_mandelbrot_subgrid_compute(SubgridComputeParams *params)
 pthread_t thread_mandelbrot_subgrid_compute(SubgridComputeParams *p)
 {
   pthread_t thread_id; // Variable to hold the thread ID
-  int result = pthread_create(&thread_id, NULL, _thread_mandelbrot_subgrid_compute, p);
+  int result = pthread_create(&thread_id, NULL, (void*) _thread_mandelbrot_subgrid_compute, p);
   return thread_id;
 }
 
