@@ -1,13 +1,14 @@
 # Mandelbrocc
+Use arrows to move around the complext plane, + / - to zoom in/out and <, > to increase "resolution"
 
 ## Todo
 - [x] autoexposure - normalize values
 - [x] decouple unecessery SDL dependencies
 - [x] multithread
+- [ ] use variable precision arithmetic
 - [ ] create basic poc for Web. Create a build script that will render the mandelbrot in a canvas
 - [ ] screenshot functionality
 - [ ] "render" functionality. Create an animation based on keyframes
-- [ ] use arbitary precision arithmetic
 - [ ] WebGPU
 
 ## Installation
